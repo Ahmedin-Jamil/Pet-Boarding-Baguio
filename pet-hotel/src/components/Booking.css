@@ -1,0 +1,195 @@
+.booking-page {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header Section */
+.booking-header {
+  background-color: #f8f9fa;
+  padding: 60px 0;
+}
+
+.booking-header h1 {
+  color: #343a40;
+  margin-bottom: 20px;
+}
+
+.booking-header p {
+  color: #6c757d;
+  font-size: 1.2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Booking Form */
+.booking-form-card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+}
+
+.booking-form-card h2 {
+  color: #343a40;
+  font-weight: 700;
+}
+
+.booking-form-card h4 {
+  color: #17a2b8;
+  font-weight: 600;
+  border-bottom: 2px solid #f1f1f1;
+  padding-bottom: 10px;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.form-control, .form-select {
+  border-radius: 8px;
+  padding: 10px 15px;
+  border-color: #e1e5eb;
+  box-shadow: none;
+}
+
+.form-control::placeholder {
+  color: #a0a0a0;
+  opacity: 0.7;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #17a2b8;
+  box-shadow: 0 0 0 0.25rem rgba(23, 162, 184, 0.25);
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.date-picker-input {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid #e1e5eb;
+  color: #495057;
+}
+
+.date-picker-input:focus {
+  outline: none;
+  border-color: #17a2b8;
+  box-shadow: 0 0 0 0.25rem rgba(23, 162, 184, 0.25);
+}
+
+/* Booking Summary */
+.booking-summary-card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 20px;
+}
+
+.booking-summary-card h3 {
+  color: #343a40;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-label {
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.summary-value {
+  font-weight: 600;
+  color: #343a40;
+}
+
+.total-row {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #17a2b8;
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 2px solid #f1f1f1;
+}
+
+.submit-btn {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.submit-btn:hover {
+  background-color: #138496;
+  border-color: #138496;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Confirmation Section */
+.confirmation-card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.confirmation-icon {
+  width: 80px;
+  height: 80px;
+  background-color: #28a745;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  margin: 0 auto;
+}
+
+.booking-details {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.book-again-btn {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.book-again-btn:hover {
+  background-color: #138496;
+  border-color: #138496;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .booking-summary-card {
+    position: static;
+    margin-top: 30px;
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@fortawesome/free-brands-svg-icons": "^6.7.2",
+    "@google/generative-ai": "^0.24.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "node-polyfill-webpack-plugin": "^4.1.0"
+  }
+}

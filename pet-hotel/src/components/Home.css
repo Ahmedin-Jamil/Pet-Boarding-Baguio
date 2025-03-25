@@ -1,0 +1,491 @@
+.home-page {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /*background-image: url('../assets/SpyCat.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+  background-color: #f9f9f9;
+  position: relative;
+  z-index: 0;*/
+
+  background-image: url('../assets/4.4.png');
+  background-size: 100% auto; /* 80% width, auto height */
+  background-position: top 20px right 30px; /* 20px from top, 30px from right */
+  background-attachment: fixed;
+  min-height: 100vh;
+  background-color: #f9f9f9;
+  position: relative;
+  z-index: 0;
+}
+
+/* Header Section */
+
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 170px;
+}
+
+.brand-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #5a3921;
+  margin: 0;
+}
+
+.logo-image img {
+  max-height: 2000px;
+  margin: 0 auto;
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.logo-image {
+  padding: 3px 0;
+  text-align: center;
+}
+/* Booking Section */
+.booking-section {
+  padding: 10px 0;
+  background-color: rgba(255, 255, 255, 0.85);
+  position: relative;
+  z-index: 1;
+}
+
+.booking-card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.booking-header {
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
+}
+
+.overnight-stays-btn {
+  background-color: #f8981d;
+  border-color: #f8981d;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 10px 25px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.overnight-stays-btn:hover {
+  background-color: #e78a10;
+  border-color: #e78a10;
+  transform: translateY(-6px);
+}
+
+.date-picker-container {
+  margin-bottom: 55px;
+}
+
+.date-picker-container h5 {
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 32px;
+  font-weight: 600;
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.form-control {
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #f8981d;
+  box-shadow: 0 0 0 0.25rem rgba(248, 152, 29, 0.25);
+}
+
+.time-picker-container {
+  margin-bottom: 25px;
+}
+
+.time-picker-container h5 {
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.check-availability-btn {
+  background-color: #28a745;
+  border-color: #28a745;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  transform: translateY(6px);
+  margin-top: 10px;
+}
+
+.check-availability-btn:hover {
+  background-color: #218838;
+  border-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.help-section {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+}
+
+.help-btn {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  background-color: #FFA500;
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.help-btn:hover {
+  transform: scale(1.1);
+  background-color: #e69500;
+}
+
+.frame-chat-popup {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  z-index: 1001;
+}
+
+.chatbot-popup {
+  position: fixed;
+  bottom: 70px;
+  right: 30px;
+  z-index: 1002;
+}
+
+/* About Us Section */
+.about-section {
+  padding: 50px 0;
+  background-color: rgba(255, 255, 255, 0.85);
+  position: relative;
+  z-index: 1;
+}
+
+.about-header h2 {
+  color: #5a3921;
+  font-weight: 700;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #f8981d;
+  padding-bottom: 10px;
+  display: inline-block;
+}
+
+.about-content p {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.location-section h2 {
+  color: #5a3921;
+  font-weight: 700;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #f8981d;
+  padding-bottom: 10px;
+  display: inline-block;
+}
+
+.location-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+}
+
+.location-link:hover {
+  transform: translateY(-5px);
+  text-decoration: none;
+  color: inherit;
+}
+
+.location-link:hover .map-container {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.location-link:hover .address-container p {
+  color: #f8981d;
+}
+
+.map-container {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+}
+
+.address-container p {
+  color: #555;
+  font-size: 1.1rem;
+  text-align: center;
+  margin-bottom: 5px;
+  transition: color 0.3s ease;
+}
+
+/* Chat Section */
+.chat-section {
+  padding: 50px 0;
+  background-color: #f9f9f9;
+}
+
+.testimonials-section h2 {
+  color: #343a40;
+  font-weight: 700;
+  margin-bottom: 50px;
+}
+
+.testimonial-carousel {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.testimonial-item {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  padding: 30px;
+  margin: 10px;
+}
+
+.testimonial-text {
+  font-size: 1.1rem;
+  color: #6c757d;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.testimonial-author {
+  color: #343a40;
+  font-weight: 600;
+}
+
+/* Chat Frame Styling */
+.chat-frame, .chatbot-frame {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  width: 300px;
+}
+
+.chat-header, .chatbot-header {
+  background-color: #5a3921;
+  padding: 15px;
+  border-bottom: 1px solid #e9ecef;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-header h4, .chatbot-header h4 {
+  margin: 0;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.chat-header .close-btn {
+  color: #ffffff;
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.chat-body, .chatbot-body {
+  padding: 20px;
+}
+
+.chat-logo {
+  margin-bottom: 15px;
+}
+
+.social-icons {
+  margin-top: 15px;
+}
+
+.social-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 5px;
+  background-color: #f8f9fa;
+  color: #5a3921;
+  border: 1px solid #e9ecef;
+  text-decoration: none;
+}
+
+.ask-questions-btn {
+  background-color: #5a3921;
+  border-color: #5a3921;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.ask-questions-btn:hover {
+  background-color: #4a2e1a;
+  border-color: #4a2e1a;
+  transform: translateY(-2px);
+}
+
+.chat-messages {
+  margin: 20px 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.message-container {
+  margin-bottom: 15px;
+}
+
+.message-header {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 5px;
+}
+
+.message-bubble {
+  background-color: #f8f9fa;
+  border-radius: 15px;
+  padding: 10px 15px;
+  display: inline-block;
+  max-width: 80%;
+}
+
+.message-bubble p {
+  margin: 0;
+  color: #343a40;
+}
+
+.user-message {
+  background-color: #4e73df;
+  color: #ffffff;
+  float: right;
+}
+
+.user-message p {
+  color: #ffffff;
+}
+
+.chat-input {
+  margin-top: 20px;
+}
+
+/* CTA Section */
+.cta-section {
+  padding: 80px 0;
+  background-color: #17a2b8;
+  color: #ffffff;
+}
+
+.cta-section h2 {
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.cta-section .book-now-btn {
+  background-color: #ffffff;
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.cta-section .book-now-btn:hover {
+  background-color: #f8f9fa;
+  color: #138496;
+  border-color: #f8f9fa;
+}
+
+.testimonials-section h2 {
+  color: #343a40;
+  font-weight: 700;
+  margin-bottom: 50px;
+}
+
+.testimonial-carousel {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.testimonial-item {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  padding: 30px;
+  margin: 10px;
+}
+
+.testimonial-text {
+  font-size: 1.1rem;
+  color: #6c757d;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.testimonial-author {
+  color: #343a40;
+  font-weight: 600;
+}
+
+/* CTA Section */
+.cta-section {
+  padding: 80px 0;
+  background-color: #17a2b8;
+  color: #ffffff;
+}
+
+.cta-section h2 {
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.cta-section .book-now-btn {
+  background-color: #ffffff;
+  color: #17a2b8;
+  border-color: #ffffff;
+}
+
+.cta-section .book-now-btn:hover {
+  background-color: #f8f9fa;
+  color: #138496;
+  border-color: #f8f9fa;
+}
