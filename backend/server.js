@@ -4,6 +4,22 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
+// Database configuration
+const dbConfig = {
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'pet_hotel',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+};
+
+console.log('Attempting to connect to database with following configuration:');
+console.log('- Host:', dbConfig.host);
+console.log('- User:', dbConfig.user);
+console.log('- Database:', dbConfig.database);
+
 // Import services
 // Temporarily commenting out RAG service due to compatibility issues
 // const ragService = require('./rag_service');
@@ -152,7 +168,7 @@ app.post('/api/chatbot/query/multilingual', async (req, res) => {
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'Kk2150100655',
+  password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || 'pet_hotel',
   waitForConnections: true,
   connectionLimit: 10,
@@ -164,10 +180,16 @@ async function testConnection() {
   try {
     const connection = await pool.getConnection();
     console.log('Database connection established successfully');
+    console.log('Connected to database:', process.env.DB_HOST);
     connection.release();
     return true;
   } catch (error) {
     console.error('Error connecting to database:', error);
+    console.log('Database connection details (without password):');
+    console.log('- Host:', process.env.DB_HOST || 'not set');
+    console.log('- User:', process.env.DB_USER || 'not set');
+    console.log('- Database:', process.env.DB_NAME || 'not set');
+    console.log('- Port:', process.env.DB_PORT || '3306 (default)');
     console.log('Continuing without database connection...');
     return false;
   }
@@ -261,7 +283,16 @@ app.get('/api/pets/grooming-info', (req, res) => {
 // Get all bookings
 app.get('/api/bookings', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM bookings');
+    // Check if we should exclude completed bookings
+    const { exclude } = req.query;
+    let query = 'SELECT * FROM bookings';
+    
+    // If exclude=completed is specified, filter out completed bookings
+    if (exclude === 'completed') {
+      query += " WHERE status != 'completed'";
+    }
+    
+    const [rows] = await pool.query(query);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching bookings:', error);
@@ -304,7 +335,10 @@ app.post('/api/bookings', async (req, res) => {
     additionalServices,
     specialRequirements,
     totalCost,
-    status = 'pending' // Default status is pending
+    status = 'pending', // Default status is pending
+    serviceType = 'overnight', // Default service type is overnight
+    selectedServiceType = null, // Specific service type for grooming
+    selectedSize = null // Pet size category
   } = req.body;
 
   try {
@@ -313,13 +347,15 @@ app.post('/api/bookings', async (req, res) => {
         pet_name, pet_type, pet_breed, pet_age, 
         owner_name, owner_email, owner_phone, 
         start_date, end_date, room_type, time_slot,
-        additional_services, special_requirements, total_cost, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        additional_services, special_requirements, total_cost, status,
+        service_type, selected_service_type, selected_size
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         petName, petType, petBreed, petAge,
         ownerName, ownerEmail, ownerPhone,
         startDate, endDate, selectedRoom, timeSlot,
-        JSON.stringify(additionalServices), specialRequirements, totalCost, status
+        JSON.stringify(additionalServices), specialRequirements, totalCost, status,
+        serviceType, selectedServiceType, selectedSize
       ]
     );
 
@@ -378,7 +414,27 @@ app.put('/api/bookings/:id', async (req, res) => {
     res.json({ message: 'Booking updated successfully' });
   } catch (error) {
     console.error('Error updating booking:', error);
-    res.status(500).json({ message: 'Server error' });
+    
+    // Provide more detailed error messages based on the error type
+    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+      res.status(503).json({ 
+        message: 'Database connection error. Please try again later.',
+        error: 'connection_issue',
+        details: error.message
+      });
+    } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      res.status(500).json({ 
+        message: 'Database authentication error. Please contact administrator.',
+        error: 'auth_issue',
+        details: error.message
+      });
+    } else {
+      res.status(500).json({ 
+        message: 'Server error while updating booking',
+        error: 'server_error',
+        details: error.message
+      });
+    }
   }
 });
 
@@ -542,7 +598,16 @@ app.get('/api/pets/grooming-info', (req, res) => {
 // Get all bookings
 app.get('/api/bookings', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM bookings');
+    // Check if we should exclude completed bookings
+    const { exclude } = req.query;
+    let query = 'SELECT * FROM bookings';
+    
+    // If exclude=completed is specified, filter out completed bookings
+    if (exclude === 'completed') {
+      query += " WHERE status != 'completed'";
+    }
+    
+    const [rows] = await pool.query(query);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching bookings:', error);
@@ -585,7 +650,10 @@ app.post('/api/bookings', async (req, res) => {
     additionalServices,
     specialRequirements,
     totalCost,
-    status = 'pending' // Default status is pending
+    status = 'pending', // Default status is pending
+    serviceType = 'overnight', // Default service type is overnight
+    selectedServiceType = null, // Specific service type for grooming
+    selectedSize = null // Pet size category
   } = req.body;
 
   try {
@@ -594,13 +662,15 @@ app.post('/api/bookings', async (req, res) => {
         pet_name, pet_type, pet_breed, pet_age, 
         owner_name, owner_email, owner_phone, 
         start_date, end_date, room_type, time_slot,
-        additional_services, special_requirements, total_cost, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        additional_services, special_requirements, total_cost, status,
+        service_type, selected_service_type, selected_size
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         petName, petType, petBreed, petAge,
         ownerName, ownerEmail, ownerPhone,
         startDate, endDate, selectedRoom, timeSlot,
-        JSON.stringify(additionalServices), specialRequirements, totalCost, status
+        JSON.stringify(additionalServices), specialRequirements, totalCost, status,
+        serviceType, selectedServiceType, selectedSize
       ]
     );
 
@@ -659,7 +729,27 @@ app.put('/api/bookings/:id', async (req, res) => {
     res.json({ message: 'Booking updated successfully' });
   } catch (error) {
     console.error('Error updating booking:', error);
-    res.status(500).json({ message: 'Server error' });
+    
+    // Provide more detailed error messages based on the error type
+    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+      res.status(503).json({ 
+        message: 'Database connection error. Please try again later.',
+        error: 'connection_issue',
+        details: error.message
+      });
+    } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      res.status(500).json({ 
+        message: 'Database authentication error. Please contact administrator.',
+        error: 'auth_issue',
+        details: error.message
+      });
+    } else {
+      res.status(500).json({ 
+        message: 'Server error while updating booking',
+        error: 'server_error',
+        details: error.message
+      });
+    }
   }
 });
 
@@ -823,7 +913,16 @@ app.get('/api/pets/grooming-info', (req, res) => {
 // Get all bookings
 app.get('/api/bookings', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM bookings');
+    // Check if we should exclude completed bookings
+    const { exclude } = req.query;
+    let query = 'SELECT * FROM bookings';
+    
+    // If exclude=completed is specified, filter out completed bookings
+    if (exclude === 'completed') {
+      query += " WHERE status != 'completed'";
+    }
+    
+    const [rows] = await pool.query(query);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching bookings:', error);
@@ -866,7 +965,10 @@ app.post('/api/bookings', async (req, res) => {
     additionalServices,
     specialRequirements,
     totalCost,
-    status = 'pending' // Default status is pending
+    status = 'pending', // Default status is pending
+    serviceType = 'overnight', // Default service type is overnight
+    selectedServiceType = null, // Specific service type for grooming
+    selectedSize = null // Pet size category
   } = req.body;
 
   try {
@@ -875,13 +977,15 @@ app.post('/api/bookings', async (req, res) => {
         pet_name, pet_type, pet_breed, pet_age, 
         owner_name, owner_email, owner_phone, 
         start_date, end_date, room_type, time_slot,
-        additional_services, special_requirements, total_cost, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        additional_services, special_requirements, total_cost, status,
+        service_type, selected_service_type, selected_size
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         petName, petType, petBreed, petAge,
         ownerName, ownerEmail, ownerPhone,
         startDate, endDate, selectedRoom, timeSlot,
-        JSON.stringify(additionalServices), specialRequirements, totalCost, status
+        JSON.stringify(additionalServices), specialRequirements, totalCost, status,
+        serviceType, selectedServiceType, selectedSize
       ]
     );
 
@@ -940,7 +1044,27 @@ app.put('/api/bookings/:id', async (req, res) => {
     res.json({ message: 'Booking updated successfully' });
   } catch (error) {
     console.error('Error updating booking:', error);
-    res.status(500).json({ message: 'Server error' });
+    
+    // Provide more detailed error messages based on the error type
+    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+      res.status(503).json({ 
+        message: 'Database connection error. Please try again later.',
+        error: 'connection_issue',
+        details: error.message
+      });
+    } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      res.status(500).json({ 
+        message: 'Database authentication error. Please contact administrator.',
+        error: 'auth_issue',
+        details: error.message
+      });
+    } else {
+      res.status(500).json({ 
+        message: 'Server error while updating booking',
+        error: 'server_error',
+        details: error.message
+      });
+    }
   }
 });
 
@@ -1104,7 +1228,16 @@ app.get('/api/pets/grooming-info', (req, res) => {
 // Get all bookings
 app.get('/api/bookings', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM bookings');
+    // Check if we should exclude completed bookings
+    const { exclude } = req.query;
+    let query = 'SELECT * FROM bookings';
+    
+    // If exclude=completed is specified, filter out completed bookings
+    if (exclude === 'completed') {
+      query += " WHERE status != 'completed'";
+    }
+    
+    const [rows] = await pool.query(query);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching bookings:', error);
@@ -1147,7 +1280,10 @@ app.post('/api/bookings', async (req, res) => {
     additionalServices,
     specialRequirements,
     totalCost,
-    status = 'pending' // Default status is pending
+    status = 'pending', // Default status is pending
+    serviceType = 'overnight', // Default service type is overnight
+    selectedServiceType = null, // Specific service type for grooming
+    selectedSize = null // Pet size category
   } = req.body;
 
   try {
@@ -1156,13 +1292,15 @@ app.post('/api/bookings', async (req, res) => {
         pet_name, pet_type, pet_breed, pet_age, 
         owner_name, owner_email, owner_phone, 
         start_date, end_date, room_type, time_slot,
-        additional_services, special_requirements, total_cost, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        additional_services, special_requirements, total_cost, status,
+        service_type, selected_service_type, selected_size
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         petName, petType, petBreed, petAge,
         ownerName, ownerEmail, ownerPhone,
         startDate, endDate, selectedRoom, timeSlot,
-        JSON.stringify(additionalServices), specialRequirements, totalCost, status
+        JSON.stringify(additionalServices), specialRequirements, totalCost, status,
+        serviceType, selectedServiceType, selectedSize
       ]
     );
 
@@ -1221,7 +1359,27 @@ app.put('/api/bookings/:id', async (req, res) => {
     res.json({ message: 'Booking updated successfully' });
   } catch (error) {
     console.error('Error updating booking:', error);
-    res.status(500).json({ message: 'Server error' });
+    
+    // Provide more detailed error messages based on the error type
+    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+      res.status(503).json({ 
+        message: 'Database connection error. Please try again later.',
+        error: 'connection_issue',
+        details: error.message
+      });
+    } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      res.status(500).json({ 
+        message: 'Database authentication error. Please contact administrator.',
+        error: 'auth_issue',
+        details: error.message
+      });
+    } else {
+      res.status(500).json({ 
+        message: 'Server error while updating booking',
+        error: 'server_error',
+        details: error.message
+      });
+    }
   }
 });
 
@@ -1385,7 +1543,16 @@ app.get('/api/pets/grooming-info', (req, res) => {
 // Get all bookings
 app.get('/api/bookings', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM bookings');
+    // Check if we should exclude completed bookings
+    const { exclude } = req.query;
+    let query = 'SELECT * FROM bookings';
+    
+    // If exclude=completed is specified, filter out completed bookings
+    if (exclude === 'completed') {
+      query += " WHERE status != 'completed'";
+    }
+    
+    const [rows] = await pool.query(query);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching bookings:', error);
@@ -1428,7 +1595,10 @@ app.post('/api/bookings', async (req, res) => {
     additionalServices,
     specialRequirements,
     totalCost,
-    status = 'pending' // Default status is pending
+    status = 'pending', // Default status is pending
+    serviceType = 'overnight', // Default service type is overnight
+    selectedServiceType = null, // Specific service type for grooming
+    selectedSize = null // Pet size category
   } = req.body;
 
   try {
@@ -1437,13 +1607,15 @@ app.post('/api/bookings', async (req, res) => {
         pet_name, pet_type, pet_breed, pet_age, 
         owner_name, owner_email, owner_phone, 
         start_date, end_date, room_type, time_slot,
-        additional_services, special_requirements, total_cost, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        additional_services, special_requirements, total_cost, status,
+        service_type, selected_service_type, selected_size
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         petName, petType, petBreed, petAge,
         ownerName, ownerEmail, ownerPhone,
         startDate, endDate, selectedRoom, timeSlot,
-        JSON.stringify(additionalServices), specialRequirements, totalCost, status
+        JSON.stringify(additionalServices), specialRequirements, totalCost, status,
+        serviceType, selectedServiceType, selectedSize
       ]
     );
 
@@ -1502,7 +1674,27 @@ app.put('/api/bookings/:id', async (req, res) => {
     res.json({ message: 'Booking updated successfully' });
   } catch (error) {
     console.error('Error updating booking:', error);
-    res.status(500).json({ message: 'Server error' });
+    
+    // Provide more detailed error messages based on the error type
+    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+      res.status(503).json({ 
+        message: 'Database connection error. Please try again later.',
+        error: 'connection_issue',
+        details: error.message
+      });
+    } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      res.status(500).json({ 
+        message: 'Database authentication error. Please contact administrator.',
+        error: 'auth_issue',
+        details: error.message
+      });
+    } else {
+      res.status(500).json({ 
+        message: 'Server error while updating booking',
+        error: 'server_error',
+        details: error.message
+      });
+    }
   }
 });
 
@@ -1666,7 +1858,16 @@ app.get('/api/pets/grooming-info', (req, res) => {
 // Get all bookings
 app.get('/api/bookings', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM bookings');
+    // Check if we should exclude completed bookings
+    const { exclude } = req.query;
+    let query = 'SELECT * FROM bookings';
+    
+    // If exclude=completed is specified, filter out completed bookings
+    if (exclude === 'completed') {
+      query += " WHERE status != 'completed'";
+    }
+    
+    const [rows] = await pool.query(query);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching bookings:', error);
@@ -1709,7 +1910,10 @@ app.post('/api/bookings', async (req, res) => {
     additionalServices,
     specialRequirements,
     totalCost,
-    status = 'pending' // Default status is pending
+    status = 'pending', // Default status is pending
+    serviceType = 'overnight', // Default service type is overnight
+    selectedServiceType = null, // Specific service type for grooming
+    selectedSize = null // Pet size category
   } = req.body;
 
   try {
@@ -1718,13 +1922,15 @@ app.post('/api/bookings', async (req, res) => {
         pet_name, pet_type, pet_breed, pet_age, 
         owner_name, owner_email, owner_phone, 
         start_date, end_date, room_type, time_slot,
-        additional_services, special_requirements, total_cost, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        additional_services, special_requirements, total_cost, status,
+        service_type, selected_service_type, selected_size
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         petName, petType, petBreed, petAge,
         ownerName, ownerEmail, ownerPhone,
         startDate, endDate, selectedRoom, timeSlot,
-        JSON.stringify(additionalServices), specialRequirements, totalCost, status
+        JSON.stringify(additionalServices), specialRequirements, totalCost, status,
+        serviceType, selectedServiceType, selectedSize
       ]
     );
 
@@ -1783,7 +1989,27 @@ app.put('/api/bookings/:id', async (req, res) => {
     res.json({ message: 'Booking updated successfully' });
   } catch (error) {
     console.error('Error updating booking:', error);
-    res.status(500).json({ message: 'Server error' });
+    
+    // Provide more detailed error messages based on the error type
+    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+      res.status(503).json({ 
+        message: 'Database connection error. Please try again later.',
+        error: 'connection_issue',
+        details: error.message
+      });
+    } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      res.status(500).json({ 
+        message: 'Database authentication error. Please contact administrator.',
+        error: 'auth_issue',
+        details: error.message
+      });
+    } else {
+      res.status(500).json({ 
+        message: 'Server error while updating booking',
+        error: 'server_error',
+        details: error.message
+      });
+    }
   }
 });
 
@@ -1947,7 +2173,16 @@ app.get('/api/pets/grooming-info', (req, res) => {
 // Get all bookings
 app.get('/api/bookings', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM bookings');
+    // Check if we should exclude completed bookings
+    const { exclude } = req.query;
+    let query = 'SELECT * FROM bookings';
+    
+    // If exclude=completed is specified, filter out completed bookings
+    if (exclude === 'completed') {
+      query += " WHERE status != 'completed'";
+    }
+    
+    const [rows] = await pool.query(query);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching bookings:', error);
@@ -1990,7 +2225,10 @@ app.post('/api/bookings', async (req, res) => {
     additionalServices,
     specialRequirements,
     totalCost,
-    status = 'pending' // Default status is pending
+    status = 'pending', // Default status is pending
+    serviceType = 'overnight', // Default service type is overnight
+    selectedServiceType = null, // Specific service type for grooming
+    selectedSize = null // Pet size category
   } = req.body;
 
   try {
@@ -1999,13 +2237,15 @@ app.post('/api/bookings', async (req, res) => {
         pet_name, pet_type, pet_breed, pet_age, 
         owner_name, owner_email, owner_phone, 
         start_date, end_date, room_type, time_slot,
-        additional_services, special_requirements, total_cost, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        additional_services, special_requirements, total_cost, status,
+        service_type, selected_service_type, selected_size
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         petName, petType, petBreed, petAge,
         ownerName, ownerEmail, ownerPhone,
         startDate, endDate, selectedRoom, timeSlot,
-        JSON.stringify(additionalServices), specialRequirements, totalCost, status
+        JSON.stringify(additionalServices), specialRequirements, totalCost, status,
+        serviceType, selectedServiceType, selectedSize
       ]
     );
 
@@ -2064,7 +2304,27 @@ app.put('/api/bookings/:id', async (req, res) => {
     res.json({ message: 'Booking updated successfully' });
   } catch (error) {
     console.error('Error updating booking:', error);
-    res.status(500).json({ message: 'Server error' });
+    
+    // Provide more detailed error messages based on the error type
+    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+      res.status(503).json({ 
+        message: 'Database connection error. Please try again later.',
+        error: 'connection_issue',
+        details: error.message
+      });
+    } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      res.status(500).json({ 
+        message: 'Database authentication error. Please contact administrator.',
+        error: 'auth_issue',
+        details: error.message
+      });
+    } else {
+      res.status(500).json({ 
+        message: 'Server error while updating booking',
+        error: 'server_error',
+        details: error.message
+      });
+    }
   }
 });
 

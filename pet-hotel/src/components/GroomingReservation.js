@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Form, Button, Nav } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Nav, Tabs, Tab, Badge } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaw, faCalendarAlt, faInfoCircle, faQuestion } from '@fortawesome/free-solid-svg-icons';
+import { faPaw, faCalendarAlt, faInfoCircle, faQuestion, faCheck, faUser, faNotesMedical } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import './Booking.css';
+import './ReservationStyles.css';
 import './GradientBackground.css';
+import './ReservationForm.css';
+import './PetTabs.css';
+import './ReservationNew.css';
 import GroomingAgreement from './GroomingAgreement';
 import DatePickerModal from './DatePickerModal';
 
@@ -22,6 +25,7 @@ const GroomingReservation = () => {
   
   // State for selected service from GroomingServices component
   const [selectedService, setSelectedService] = useState(null);
+  const [selectedServiceType, setSelectedServiceType] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   
   // Get date, time, and service selection from location state if available
@@ -33,16 +37,57 @@ const GroomingReservation = () => {
       
       // Get selected service data from GroomingServices component
       if (location.state.selectedService) setSelectedService(location.state.selectedService);
+      if (location.state.selectedServiceType) setSelectedServiceType(location.state.selectedServiceType);
       if (location.state.selectedSize) setSelectedSize(location.state.selectedSize);
     }
   }, [location]);
   
-  // State for form fields
-  const [petName, setPetName] = useState('');
-  const [petType, setPetType] = useState('');
-  const [breed, setBreed] = useState('');
-  const [sex, setSex] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState(null);
+  // State for number of pets
+  const [numberOfPets, setNumberOfPets] = useState(1);
+  const [activeTab, setActiveTab] = useState(0);
+  
+  // State for multiple pets
+  const [pets, setPets] = useState([{
+    petName: '',
+    petType: '',
+    otherPetType: '',
+    breed: '',
+    sex: '',
+    dateOfBirth: null
+  }]);
+  
+  // Helper function to update pet information
+  const updatePetInfo = (index, field, value) => {
+    const updatedPets = [...pets];
+    updatedPets[index] = { ...updatedPets[index], [field]: value };
+    setPets(updatedPets);
+  };
+  
+  // Handle number of pets change
+  const handleNumberOfPetsChange = (e) => {
+    const newNumber = parseInt(e.target.value);
+    setNumberOfPets(newNumber);
+    
+    // Update pets array based on new number
+    if (newNumber > pets.length) {
+      // Add more pet forms
+      const additionalPets = Array(newNumber - pets.length).fill().map(() => ({
+        petName: '',
+        petType: '',
+        otherPetType: '',
+        breed: '',
+        sex: '',
+        dateOfBirth: null
+      }));
+      setPets([...pets, ...additionalPets]);
+    } else if (newNumber < pets.length) {
+      // Remove excess pet forms
+      setPets(pets.slice(0, newNumber));
+      if (activeTab >= newNumber) {
+        setActiveTab(newNumber - 1);
+      }
+    }
+  };
   
   const [ownerName, setOwnerName] = useState('');
   const [ownerPhone, setOwnerPhone] = useState('');
@@ -55,15 +100,21 @@ const GroomingReservation = () => {
   
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Create pet details array from all pets
+    const petDetailsArray = pets.map(pet => ({
+      name: pet.petName,
+      type: pet.petType === 'Others' ? `Others/${pet.otherPetType}` : pet.petType,
+      breed: pet.breed,
+      sex: pet.sex,
+      age: pet.dateOfBirth ? `${pet.dateOfBirth.toLocaleDateString()}` : ''
+    }));
+    
     // Create booking data object to pass to confirmation page
     const bookingData = {
-      petDetails: {
-        name: petName,
-        type: petType,
-        breed: breed,
-        sex: sex,
-        age: dateOfBirth ? `${dateOfBirth.toLocaleDateString()}` : ''
-      },
+      numberOfPets: numberOfPets,
+      petDetails: petDetailsArray.length === 1 ? petDetailsArray[0] : petDetailsArray[0], // For backward compatibility
+      allPetDetails: petDetailsArray, // New field for multiple pets
       ownerDetails: {
         name: ownerName,
         email: ownerEmail,
@@ -71,8 +122,9 @@ const GroomingReservation = () => {
         address: 'Not provided' // Grooming doesn't collect address
       },
       scheduledDateTime: startDate ? `${startDate.toLocaleDateString()} | ${selectedTime || '8:00 am'}` : '2025/03/22 | 8:00 am',
-      services: selectedService === 'daycare' ? 'Pet Daycare' : 'Marsha\'s Tub Bath Service',
+      services: selectedServiceType || (selectedService === 'daycare' ? 'Pet Daycare' : 'Marsha\'s Tub Bath Service'),
       selectedService: selectedService,
+      selectedServiceType: selectedServiceType,
       selectedSize: selectedSize,
       additionalInfo: noAdditionalInfo ? 'None' : additionalInfo
     };
@@ -82,153 +134,248 @@ const GroomingReservation = () => {
   };
   
   return (
-    <div className="booking-page">
-      {/* Navigation Tabs */}
-      <div className="gradient-background">
-        <Container>
-          <Nav className="justify-content-between">
-            <Nav.Item>
-              <Button 
-                variant="link" 
-                className="nav-link" 
-                onClick={() => setShowDatePickerModal(true)}
-                style={{ color: '#000' }}
-              >
-                <FontAwesomeIcon icon={faCalendarAlt} className="me-2" />
-                Select Date
-              </Button>
-            </Nav.Item>
-            <Nav.Item>
-              <Button 
-                variant="link" 
-                className="nav-link" 
-                onClick={() => navigate('/grooming-services')}
-                style={{ color: '#000' }}
-              >
-                <FontAwesomeIcon icon={faPaw} className="me-2" />
-                Select Services
-              </Button>
-            </Nav.Item>
-            <Nav.Item>
-              <Button 
-                variant="link" 
-                className="nav-link active" 
-                style={{ color: '#000', fontWeight: 'bold' }}
-              >
-                <FontAwesomeIcon icon={faInfoCircle} className="me-2" />
-                Reservation Details
-              </Button>
-            </Nav.Item>
-            <Nav.Item>
-              <Button 
-                variant="link" 
-                className="nav-link" 
-                style={{ color: '#000' }}
-              >
-                Confirmation
-              </Button>
-            </Nav.Item>
-          </Nav>
-        </Container>
+    <div className="reservation-page">
+      {/* Progress Steps */}
+      <div className="progress-steps">
+        <div className="step">
+          <div className="step-circle completed">
+            <FontAwesomeIcon icon={faCalendarAlt} />
+          </div>
+          <div className="step-text">Select Date</div>
+        </div>
+        <div className="step">
+          <div className="step-circle completed">
+            <FontAwesomeIcon icon={faPaw} />
+          </div>
+          <div className="step-text">Select Services</div>
+        </div>
+        <div className="step">
+          <div className="step-circle active">
+            <FontAwesomeIcon icon={faInfoCircle} />
+          </div>
+          <div className="step-text active">Reservation Details</div>
+        </div>
+        <div className="step">
+          <div className="step-circle">
+            <FontAwesomeIcon icon={faCheck} />
+          </div>
+          <div className="step-text">Confirmation</div>
+        </div>
       </div>
       
       {/* Header Section */}
-      <div className="gradient-background" style={{ padding: '20px 0', textAlign: 'center' }}>
+      <div className="header-section">
         <Container>
-          <h2 style={{ color: '#fff' }}>Guest Information(Grooming)</h2>
+          <h2>Guest Information (Grooming)</h2>
+          <p>Please provide details for your pet(s)</p>
         </Container>
       </div>
 
       {/* Form Section */}
-      <div className="gradient-background" style={{ padding: '20px 0' }}>
-        <Container>
-          <Form onSubmit={handleSubmit}>
+      <Container>
+        <Form onSubmit={handleSubmit}>
+            {/* Number of Pets Selection */}
             <div className="bg-light p-4 rounded mb-4">
-              <h3 className="mb-4">Pet</h3>
               <Row className="mb-3">
                 <Col md={6}>
-                  <Form.Group controlId="petName">
-                    <Form.Label>Pet's Name</Form.Label>
-                    <Form.Control 
-                      type="text" 
-                      value={petName}
-                      onChange={(e) => setPetName(e.target.value)}
-                      placeholder="e.g., Max, Bella, Luna"
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group controlId="petType">
-                    <Form.Label>Pet's Type</Form.Label>
+                  <Form.Group controlId="numberOfPets">
+                    <Form.Label>Number of Pets</Form.Label>
                     <Form.Select 
-                      value={petType}
-                      onChange={(e) => setPetType(e.target.value)}
-                      required
-                    >
-                      <option value="">Select Pet Type</option>
-                      <option value="Dog">Dog</option>
-                      <option value="Cat">Cat</option>
-                      <option value="Rabbit">Rabbit</option>
-                      <option value="Bird">Bird</option>
-                      <option value="Hamster">Hamster</option>
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-              </Row>
-              
-              <Row className="mb-3">
-                <Col md={6}>
-                  <Form.Group controlId="breed">
-                    <Form.Label>Breed</Form.Label>
-                    <Form.Control 
-                      type="text" 
-                      value={breed}
-                      onChange={(e) => setBreed(e.target.value)}
-                      placeholder="e.g., Golden Retriever, Persian Cat"
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group controlId="sex">
-                    <Form.Label>Sex</Form.Label>
-                    <Form.Select 
-                      value={sex}
-                      onChange={(e) => setSex(e.target.value)}
-                      required
-                    >
-                      <option value="">Select</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-              </Row>
-              
-              <Row className="mb-3">
-                <Col md={12}>
-                  <Form.Group controlId="dateOfBirth">
-                    <Form.Label>Date of Birth</Form.Label>
-                    <DatePicker
-                      selected={dateOfBirth}
-                      onChange={(date) => setDateOfBirth(date)}
-                      maxDate={new Date()}
-                      showYearDropdown
-                      scrollableYearDropdown
-                      yearDropdownItemNumber={15}
-                      dateFormat="MM/dd/yyyy"
-                      placeholderText="Select date"
+                      value={numberOfPets}
+                      onChange={handleNumberOfPetsChange}
                       className="form-control"
-                      required
-                    />
+                      style={{ maxWidth: '200px' }}
+                    >
+                      {[...Array(10)].map((_, i) => (
+                        <option key={i+1} value={i+1}>{i+1}</option>
+                      ))}
+                    </Form.Select>
                   </Form.Group>
                 </Col>
               </Row>
             </div>
             
+            {/* Pet Information Tabs */}
             <div className="bg-light p-4 rounded mb-4">
-              <h3 className="mb-4">Owner</h3>
+              <h3 className="mb-4">Pet Information</h3>
+              
+              {/* Tab Navigation */}
+              <Tabs
+                activeKey={activeTab}
+                onSelect={(k) => setActiveTab(parseInt(k))}
+                id="pet-tabs"
+                className="mb-4 pet-tabs"
+              >
+                {pets.map((_, index) => (
+                  <Tab 
+                    key={index} 
+                    eventKey={index} 
+                    title={
+                      <span>
+                        Pet {index + 1}
+                        {pets[index].petName && <span> - {pets[index].petName}</span>}
+                      </span>
+                    }
+                  />
+                ))}
+              </Tabs>
+              
+              {/* Active Pet Form */}
+              {pets.map((pet, index) => (
+                <div key={index} style={{ display: activeTab === index ? 'block' : 'none' }}>
+                  <Row className="mb-3">
+                    <Col md={6}>
+                      <Form.Group controlId={`petName-${index}`}>
+                        <Form.Label>Pet's Name</Form.Label>
+                        <Form.Control 
+                          type="text" 
+                          value={pet.petName}
+                          onChange={(e) => updatePetInfo(index, 'petName', e.target.value)}
+                          placeholder="e.g., Max, Bella, Luna"
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group controlId={`petType-${index}`}>
+                        <Form.Label>Pet's Type</Form.Label>
+                        <div className="d-flex gap-2">
+                          <Form.Select 
+                            value={pet.petType || ''}
+                            onChange={(e) => {
+                              const selectedValue = e.target.value;
+                              // Force update the pet type state
+                              const updatedPets = [...pets];
+                              updatedPets[index] = { ...updatedPets[index], petType: selectedValue };
+                              if (selectedValue !== 'Others') {
+                                updatedPets[index].otherPetType = '';
+                              }
+                              setPets(updatedPets);
+                            }}
+                            required
+                            style={{ flex: 1 }}
+                          >
+                            <option key="default" value="">Select Pet Type</option>
+                            <option key="dog" value="Dog">Dog</option>
+                            <option key="cat" value="Cat">Cat</option>
+                            <option key="rabbit" value="Rabbit">Rabbit</option>
+                            <option key="bird" value="Bird">Bird</option>
+                            <option key="hamster" value="Hamster">Hamster</option>
+                            <option key="others" value="Others">Others</option>
+                          </Form.Select>
+                          {pet.petType === 'Others' && (
+                            <Form.Control
+                              type="text"
+                              value={pet.otherPetType}
+                              onChange={(e) => updatePetInfo(index, 'otherPetType', e.target.value)}
+                              placeholder="Specify pet type"
+                              required
+                              style={{ flex: 1 }}
+                            />
+                          )}
+                        </div>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  
+                  <Row className="mb-3">
+                    <Col md={6}>
+                      <Form.Group controlId={`breed-${index}`}>
+                        <Form.Label>Breed</Form.Label>
+                        <Form.Control 
+                          type="text" 
+                          value={pet.breed}
+                          onChange={(e) => updatePetInfo(index, 'breed', e.target.value)}
+                          placeholder="e.g., Golden Retriever, Persian Cat"
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group controlId={`sex-${index}`}>
+                        <Form.Label>Sex</Form.Label>
+                        <Form.Select 
+                          value={pet.sex}
+                          onChange={(e) => updatePetInfo(index, 'sex', e.target.value)}
+                          required
+                        >
+                          <option value="">Select</option>
+                          <option value="male">Male</option>
+                          <option value="female">Female</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  
+                  <Row className="mb-3">
+                    <Col md={12}>
+                      <Form.Group controlId={`dateOfBirth-${index}`}>
+                        <Form.Label>Date of Birth</Form.Label>
+                        <DatePicker
+                          selected={pet.dateOfBirth}
+                          onChange={(date) => updatePetInfo(index, 'dateOfBirth', date)}
+                          maxDate={new Date()}
+                          showYearDropdown
+                          scrollableYearDropdown
+                          yearDropdownItemNumber={15}
+                          dateFormat="MM/dd/yyyy"
+                          placeholderText="Select date"
+                          className="form-control"
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  
+                  {/* Pet Navigation Buttons */}
+                  <div className="d-flex justify-content-between mt-3 mb-2">
+                    <Button
+                      variant="outline-primary"
+                      onClick={() => setActiveTab(Math.max(0, activeTab - 1))}
+                      disabled={activeTab === 0}
+                    >
+                      Previous Pet
+                    </Button>
+                    <Button
+                      variant="outline-primary"
+                      onClick={() => setActiveTab(Math.min(numberOfPets - 1, activeTab + 1))}
+                      disabled={activeTab === numberOfPets - 1}
+                    >
+                      Next Pet
+                    </Button>
+                  </div>
+                  
+                  {/* Pet Completion Status */}
+                  <div className="pet-status mt-3">
+                    <div className="d-flex justify-content-center">
+                      {pets.map((_, idx) => (
+                        <Badge 
+                          key={idx} 
+                          bg={idx === activeTab ? 'primary' : 
+                             (pets[idx].petName && pets[idx].petType && pets[idx].breed && pets[idx].sex) ? 'success' : 'secondary'}
+                          style={{ 
+                            width: '30px', 
+                            height: '30px', 
+                            borderRadius: '50%', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            margin: '0 5px',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => setActiveTab(idx)}
+                        >
+                          {idx + 1}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="info-card">
+              <h3><FontAwesomeIcon icon={faUser} className="me-2" />Owner Information</h3>
               <Row className="mb-3">
                 <Col md={6}>
                   <Form.Group controlId="ownerName">
@@ -272,9 +419,9 @@ const GroomingReservation = () => {
               </Row>
             </div>
             
-            <div className="bg-light p-4 rounded mb-4">
-              <h3 className="mb-4">Additional Information</h3>
-              <p>(Healthe history like Allergies, Tick and Fleas Meds, Vaccine etc)</p>
+            <div className="info-card additional-info-section">
+              <h3><FontAwesomeIcon icon={faNotesMedical} className="me-2" />Additional Information</h3>
+              <p>(Feeding habits, medical conditions, allergies, tick and flea needs, vaccine info, etc.)</p>
               
               <Form.Group controlId="additionalInfo" className="mb-3">
                 <Form.Control 
@@ -336,7 +483,6 @@ const GroomingReservation = () => {
             </div>
           </Form>
         </Container>
-      </div>
       
       {/* Help Button */}
       <div style={{ position: 'fixed', bottom: '20px', right: '20px' }}>

@@ -20,26 +20,7 @@
   margin: 0 auto;
 }
 
-/* Booking Form */
-.booking-form-card {
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  margin-bottom: 30px;
-}
-
-.booking-form-card h2 {
-  color: #343a40;
-  font-weight: 700;
-}
-
-.booking-form-card h4 {
-  color: #17a2b8;
-  font-weight: 600;
-  border-bottom: 2px solid #f1f1f1;
-  padding-bottom: 10px;
-}
-
+/* Form Styling */
 .form-label {
   font-weight: 500;
   color: #495057;
@@ -80,70 +61,6 @@
   box-shadow: 0 0 0 0.25rem rgba(23, 162, 184, 0.25);
 }
 
-/* Booking Summary */
-.booking-summary-card {
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  position: sticky;
-  top: 20px;
-}
-
-.booking-summary-card h3 {
-  color: #343a40;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-
-.summary-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #f1f1f1;
-}
-
-.summary-item:last-child {
-  border-bottom: none;
-}
-
-.summary-label {
-  font-weight: 500;
-  color: #6c757d;
-}
-
-.summary-value {
-  font-weight: 600;
-  color: #343a40;
-}
-
-.total-row {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #17a2b8;
-  margin-top: 10px;
-  padding-top: 15px;
-  border-top: 2px solid #f1f1f1;
-}
-
-.submit-btn {
-  background-color: #17a2b8;
-  border-color: #17a2b8;
-  padding: 12px 30px;
-  border-radius: 30px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  width: 100%;
-  margin-top: 20px;
-}
-
-.submit-btn:hover {
-  background-color: #138496;
-  border-color: #138496;
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
 /* Confirmation Section */
 .confirmation-card {
   border: none;
@@ -171,16 +88,18 @@
   margin: 20px 0;
 }
 
-.book-again-btn {
+.submit-btn {
   background-color: #17a2b8;
   border-color: #17a2b8;
   padding: 12px 30px;
   border-radius: 30px;
   font-weight: 600;
   transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 20px;
 }
 
-.book-again-btn:hover {
+.submit-btn:hover {
   background-color: #138496;
   border-color: #138496;
   transform: translateY(-3px);

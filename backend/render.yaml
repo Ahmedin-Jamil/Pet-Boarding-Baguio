@@ -7,13 +7,24 @@ services:
     envVars:
       - key: PORT
         value: 10000
+      # Database Configuration
       - key: DB_HOST
-        sync: false
+        value: biim7iwyl6b2ge2iq1ec-mysql.services.clever-cloud.com
       - key: DB_USER
-        sync: false
+        value: uvg6pnqtlwltjgki
       - key: DB_PASSWORD
-        sync: false
+        value: mKZ8W8O8IXanLzTI4q08
       - key: DB_NAME
-        sync: false
+        value: biim7iwyl6b2ge2iq1ec
+      - key: DB_PORT
+        value: 3306
+      # API Keys
       - key: API_KEY
-        sync: false
+        value: AIzaSyA3rOWXZ0AaYNCE9KV5gCGChXUMgn9hq_Y
+      - key: OPENAI_API_KEY
+        value: AIzaSyA3rOWXZ0AaYNCE9KV5gCGChXUMgn9hq_Y
+      # Pet API Keys
+      - key: DOG_API_KEY
+        value: https://api.thedogapi.com/v1
+      - key: CAT_API_KEY
+        value: https://api.thecatapi.com/v1

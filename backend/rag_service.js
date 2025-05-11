@@ -18,7 +18,7 @@ const router = express.Router();
 
 // Initialize OpenAI client
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || 'AIzaSyA3rOWXZ0AaYNCE9KV5gCGChXUMgn9hq_Y', // Replace with your API key or use environment variable
+  apiKey: process.env.OPENAI_API_KEY, // Use environment variable for API key
 });
 
 // Path to knowledge base directory
@@ -53,7 +53,7 @@ async function loadDocuments() {
     
     // Create vector store from documents
     const embeddings = new OpenAIEmbeddings({
-      openAIApiKey: process.env.OPENAI_API_KEY || 'AIzaSyA3rOWXZ0AaYNCE9KV5gCGChXUMgn9hq_Y', // Replace with your API key
+      openAIApiKey: process.env.OPENAI_API_KEY, // Use environment variable for API key
     });
     
     vectorStore = await MemoryVectorStore.fromDocuments(splitDocs, embeddings);

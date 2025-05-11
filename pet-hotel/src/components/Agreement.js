@@ -1,6 +1,8 @@
 import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import './Agreement.css';
+import baguioLogo from '../assets/logo192.png';
+
 
 const Agreement = ({ show, onHide }) => {
   return (
@@ -20,7 +22,7 @@ const Agreement = ({ show, onHide }) => {
       <Modal.Body>
         <div className="text-center mb-4">
           <img 
-            src="/logo192.png" 
+            src={baguioLogo} 
             alt="Baguio Pet Boarding" 
             style={{ width: '80px', height: 'auto' }} 
             className="mb-3"

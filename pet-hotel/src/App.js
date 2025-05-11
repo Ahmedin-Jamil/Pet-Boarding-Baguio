@@ -2,17 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import { BookingProvider } from './context/BookingContext';
 
 // Import components
 import NavigationBar from './components/Navbar';
-import Home from './components/Home';
+import HomeNew from './components/HomeNew';
 import Services from './components/Services';
-import Booking from './components/Booking';
+// Booking component removed as requested
 import GroomingServices from './components/GroomingServices';
 import GroomingReservation from './components/GroomingReservation';
 import OvernightReservation from './components/OvernightReservation';
 import Confirmation from './components/Confirmation';
-import AdminBookingList from './components/AdminBookingList';
+import AdminDashboard from './components/AdminDashboard';
 import ChatbotButton from './components/ChatbotButton';
 import SplashScreen from './components/SplashScreen';
 
@@ -25,14 +26,14 @@ const AppContent = () => {
     <div className="App">
       {!isAdminPage && <NavigationBar />}
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<HomeNew />} />
         <Route path="/services" element={<Services />} />
         <Route path="/grooming-services" element={<GroomingServices />} />
-        <Route path="/booking" element={<Booking />} />
+        {/* Booking route removed as requested */}
         <Route path="/grooming-reservation" element={<GroomingReservation />} />
         <Route path="/overnight-reservation" element={<OvernightReservation />} />
         <Route path="/confirmation" element={<Confirmation />} />
-        <Route path="/admin/bookings" element={<AdminBookingList />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
       <ChatbotButton />
     </div>
@@ -47,13 +48,15 @@ function App() {
   };
 
   return (
-    <Router>
-      {showSplash ? (
-        <SplashScreen onFinished={handleSplashFinished} />
-      ) : (
-        <AppContent />
-      )}
-    </Router>
+    <BookingProvider>
+      <Router>
+        {showSplash ? (
+          <SplashScreen onFinished={handleSplashFinished} />
+        ) : (
+          <AppContent />
+        )}
+      </Router>
+    </BookingProvider>
   );
 }
 

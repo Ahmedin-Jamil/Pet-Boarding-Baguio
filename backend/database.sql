@@ -22,6 +22,9 @@ CREATE TABLE IF NOT EXISTS bookings (
   special_requirements TEXT,
   total_cost DECIMAL(10, 2) NOT NULL,
   status VARCHAR(20) DEFAULT 'pending',
+  service_type VARCHAR(50) DEFAULT 'overnight',
+  selected_service_type VARCHAR(100),
+  selected_size VARCHAR(50),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

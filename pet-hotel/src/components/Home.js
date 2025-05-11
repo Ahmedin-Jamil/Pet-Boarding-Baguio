@@ -39,7 +39,7 @@ const Home = () => {
                   src={baguioLogo} 
                   alt="Baguio Pet Boarding Logo" 
                   className="img-fluid"
-                  style={{ width: '100px', height: '430px', opacity: 0 }}
+                  style={{ visibility: 'hidden' }}
                 />
               </div>
             </Col>
@@ -143,6 +143,11 @@ const Home = () => {
                   </Row>
                   
                   <div className="text-center mt-4">
+                    {serviceType === 'overnight' && endDate < startDate && (
+                      <div className="text-danger mb-2">
+                        <small>Check-out date cannot be earlier than check-in date.</small>
+                      </div>
+                    )}
                     <Button 
                       variant="success" 
                       className="check-availability-btn"
@@ -156,7 +161,7 @@ const Home = () => {
                         };
                         navigate(serviceType === 'overnight' ? '/services' : '/grooming-services', { state: dateTimeData });
                       }}
-                      disabled={!startDate || !selectedTime || (serviceType === 'overnight' && !endDate)}
+                      disabled={!startDate || !selectedTime || (serviceType === 'overnight' && (!endDate || endDate < startDate))}
                     >
                       Check Availability
                     </Button>
@@ -177,23 +182,27 @@ const Home = () => {
         <Container>
           <Row>
             <Col md={6}>
-              <div className="about-header">
-                <h2>About Us</h2>
-              </div>
-              <div className="about-content">
-                <p>
-                  <strong>About Baguio Pet Boarding (Martha's Pet Emporium)</strong> - where love for pets inspired the creation of a haven for your furry friends.
-                </p>
-                <p>
-                  Our story began with Mimi and Marj (Martha's daughters), two friends who have recognized her special connection with pets, prompting them to extend that natural companionship to her care, leading to the establishment of Baguio Pet Boarding. As pet lovers and owners ourselves, we aim to provide an environment where your pets not only stay but feel truly at home. We treat every pet as an extension of our own family, ensuring they receive the love, care, and attention they deserve. Cuddles and playtime ahead!
-                </p>
-                <p>
-                  Our team of loving pet sitters—Geri, Ate Mhen, Doc J, Kuya Marlo, Mimi, Marj, and Buff contribute their unique warmth and expertise. Together, they form a compassionate team committed to treating your pets with the utmost care and attention. Rest assured, your cherished companions are in good hands with our devoted pet-sitting team.
-                </p>
-                <p>
-                  Communication is key, and we understand how much you care about your pets. That's why we're dedicated to sending regular updates and happily discussing your pets whenever you wish. Our dog-friendly environment ensures that your pets are not only comfortable but also safe during their stay with us.
-                </p>
-              </div>
+              <Card className="shadow-sm mb-4">
+                <Card.Body className="p-4">
+                  <div className="about-header">
+                    <h2>About Us</h2>
+                  </div>
+                  <div className="about-content">
+                    <p>
+                      <strong>About Baguio Pet Boarding (Martha's Pet Emporium)</strong> - where love for pets inspired the creation of a haven for your furry friends.
+                    </p>
+                    <p>
+                      Our story began with Mimi and Marj (Martha's daughters), two friends who have recognized her special connection with pets, prompting them to extend that natural companionship to her care, leading to the establishment of Baguio Pet Boarding. As pet lovers and owners ourselves, we aim to provide an environment where your pets not only stay but feel truly at home. We treat every pet as an extension of our own family, ensuring they receive the love, care, and attention they deserve. Cuddles and playtime ahead!
+                    </p>
+                    <p>
+                      Our team of loving pet sitters—Geri, Ate Mhen, Doc J, Kuya Marlo, Mimi, Marj, and Buff contribute their unique warmth and expertise. Together, they form a compassionate team committed to treating your pets with the utmost care and attention. Rest assured, your cherished companions are in good hands with our devoted pet-sitting team.
+                    </p>
+                    <p>
+                      Communication is key, and we understand how much you care about your pets. That's why we're dedicated to sending regular updates and happily discussing your pets whenever you wish. Our dog-friendly environment ensures that your pets are not only comfortable but also safe during their stay with us.
+                    </p>
+                  </div>
+                </Card.Body>
+              </Card>
             </Col>
             
             <Col md={6}>

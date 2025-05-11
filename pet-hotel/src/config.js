@@ -1,17 +1,13 @@
-// API configuration for different environments
+// API configuration
 const config = {
-  // Development API URL (local)
-  development: {
-    apiUrl: 'http://localhost:5001'
-  },
+  // Local development API URL
+  apiUrl: 'http://localhost:5001',
   // Production API URL (Render.com deployed backend)
-  production: {
-    apiUrl: 'https://baguio-pet-boarding-api.onrender.com'
-  }
+  productionApiUrl: 'https://baguio-pet-boarding-api.onrender.com'
 };
 
-// Determine current environment
-const environment = process.env.NODE_ENV || 'development';
-
-// Export the API URL based on current environment
-export const API_URL = config[environment].apiUrl;
+// Export the API URL based on environment
+// When deployed on GitHub Pages, use the production URL
+// Otherwise, use the local development URL
+const isProduction = window.location.hostname !== 'localhost';
+export const API_URL = isProduction ? config.productionApiUrl : config.apiUrl;

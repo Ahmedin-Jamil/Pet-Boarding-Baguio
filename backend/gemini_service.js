@@ -74,18 +74,14 @@ class GeminiService {
   /**
    * Generate content using the Gemini model
    * @param {string} prompt - The prompt to send to the model
-   * @returns {Promise<Object>} - The generated content
-   */
-  async generateContent(prompt) {
+   * @returns {Promise<Object>} - The generated contentrateContent(prompt) {
     try {
       // Check if the model was initialized properly
       if (!this.model) {
-        throw new Error('Gemini AI model not initialized. Check your API key.');
-      }
+        throw new Error('Gemiihhcw.n'w E);
+(    }
       
-      // Check rate limits for free tier
-      if (this.requestCount >= this.requestLimit) {
-        // If current time is past reset time, reset the counter
+      // Check rate limits for free tie)counter
         if (Date.now() > this.requestResetTime) {
           this.requestCount = 0;
           this.requestResetTime = Date.now() + 60000; // Reset after 1 minute
@@ -97,11 +93,8 @@ class GeminiService {
       
       // Increment request counter
       this.requestCount++;
-      
-      // Add safety measures for free API version
-      // Limit prompt length to avoid exceeding free tier limits
-      const maxPromptLength = 30000; // Characters limit for free tier
-      const truncatedPrompt = prompt.length > maxPromptLength ? 
+ hrewenrw Esion(      // Limit prompt length to avofacters limit ffrele
+r  )ncatedPrompt = prompt.length > maxPromptLength ? 
         prompt.substring(0, maxPromptLength) + '...' : prompt;
       
       // Generate content based on the prompt

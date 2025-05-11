@@ -4,9 +4,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaw, faCalendarAlt, faInfoCircle, faQuestion, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import DatePickerModal from './DatePickerModal';
+import ImportantNoticeCard from './ImportantNoticeCard';
 import './Services.css';
 import './ModernEffects.css';
 import './GradientBackground.css';
+import baguioLogo from '../assets/logo192.png';
+
 
 const GroomingServices = () => {
   const navigate = useNavigate();
@@ -16,7 +19,9 @@ const GroomingServices = () => {
   const [showDatePickerModal, setShowDatePickerModal] = useState(false);
   const [serviceType, setServiceType] = useState('grooming');
   const [selectedService, setSelectedService] = useState(null);
-  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedServiceType, setSelectedServiceType] = useState(null);
+  // We no longer need selectedSize as it will be determined at the facility
+  // const [selectedSize, setSelectedSize] = useState(null);
   
   // No parallax or animation effects
   
@@ -80,244 +85,311 @@ const GroomingServices = () => {
       {/* Grooming Services Section */}
       <div className="gradient-background" style={{ padding: '20px 0' }}>
         <Container>
-          <Row>
-            {/* Pet Daycare Section */}
-            <Col md={6}>
-              <Card className="mb-4" style={{ backgroundColor: '#fff', borderRadius: '10px' }}>
-                <Card.Body>
-                  <h3 className="text-center mb-3">PET DAYCARE</h3>
-                  <div className="p-3">
-                    <h5 className="mb-3">Minimum of (6) Hours</h5>
-                    <Row className="mt-4 text-center">
-                      <Col xs={12} className="mb-2">
-                        <Button 
-                          className={`room-size-btn ${selectedService === 'daycare' && selectedSize === 'small' ? 'selected' : ''}`}
-                          onClick={() => {
-                            setSelectedService('daycare');
-                            setSelectedSize('small');
-                          }}
-                          style={{ 
-                            width: '100%', 
-                            padding: '15px',
-                            backgroundColor: '#FFF8E1',
-                            color: '#FF8C00',
-                            border: '1px solid #FFD180',
-                            borderRadius: '10px',
-                            fontSize: '1.1rem',
-                            fontWeight: 'bold',
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          {selectedService === 'daycare' && selectedSize === 'small' && (
-                            <FontAwesomeIcon icon={faCheck} className="me-2" />
-                          )}
-                          <FontAwesomeIcon icon={faPaw} className="me-2" />
-                          Small (P350)
-                        </Button>
+          <h3 className="text-center mb-4" style={{ color: '#fff' }}>MARSHA'S TUB</h3>
+          
+          {/* Premium Grooming */}
+          <Card 
+            className="mb-4" 
+            style={{ 
+              backgroundColor: selectedService === 'premium' ? '#e8f5e9' : '#fff', 
+              borderRadius: '10px',
+              cursor: 'pointer',
+              border: selectedService === 'premium' ? '2px solid #28a745' : '1px solid rgba(0,0,0,.125)',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => {
+              setSelectedService(selectedService === 'premium' ? null : 'premium');
+              setSelectedServiceType('Premium Grooming');
+            }}
+          >
+            <Card.Body>
+              <h4 className="text-center mb-3">
+                {selectedService === 'premium' && (
+                  <FontAwesomeIcon icon={faCheck} className="me-2" style={{ color: '#28a745' }} />
+                )}
+                PREMIUM GROOMING
+              </h4>
+              <p className="text-center">+L'beau Premium Products, Bath & Dry, Ear Cleaning, Sanitary, Paw Cleaning, Trimmer Cut, Puppy Cut or Full Shave</p>
+              
+              <Row className="mt-4 text-center">
+                <Col md={12}>
+                  <div className="price-info-box" style={{ 
+                    backgroundColor: '#FFF8E1', 
+                    padding: '20px', 
+                    borderRadius: '10px',
+                    border: '1px solid #FFD180'
+                  }}>
+                    <Row className="justify-content-center">
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Toy/Small <span style={{ fontWeight: 'bold' }}>1-9 KG</span></p>
+                          <p>Php 750</p>
+                        </div>
                       </Col>
-                      <Col xs={12} className="mb-2">
-                        <Button 
-                          className={`room-size-btn ${selectedService === 'daycare' && selectedSize === 'medium' ? 'selected' : ''}`}
-                          onClick={() => {
-                            setSelectedService('daycare');
-                            setSelectedSize('medium');
-                          }}
-                          style={{ 
-                            width: '100%', 
-                            padding: '15px',
-                            backgroundColor: '#FFF8E1',
-                            color: '#FF8C00',
-                            border: '1px solid #FFD180',
-                            borderRadius: '10px',
-                            fontSize: '1.1rem',
-                            fontWeight: 'bold',
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          {selectedService === 'daycare' && selectedSize === 'medium' && (
-                            <FontAwesomeIcon icon={faCheck} className="me-2" />
-                          )}
-                          <FontAwesomeIcon icon={faPaw} className="me-2" />
-                          Medium (P450)
-                        </Button>
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Medium <span style={{ fontWeight: 'bold' }}>9-25 KG</span></p>
+                          <p>Php 850</p>
+                        </div>
                       </Col>
-                      <Col xs={12} className="mb-2">
-                        <Button 
-                          className={`room-size-btn ${selectedService === 'daycare' && selectedSize === 'large' ? 'selected' : ''}`}
-                          onClick={() => {
-                            setSelectedService('daycare');
-                            setSelectedSize('large');
-                          }}
-                          style={{ 
-                            width: '100%', 
-                            padding: '15px',
-                            backgroundColor: '#FFF8E1',
-                            color: '#FF8C00',
-                            border: '1px solid #FFD180',
-                            borderRadius: '10px',
-                            fontSize: '1.1rem',
-                            fontWeight: 'bold',
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          {selectedService === 'daycare' && selectedSize === 'large' && (
-                            <FontAwesomeIcon icon={faCheck} className="me-2" />
-                          )}
-                          <FontAwesomeIcon icon={faPaw} className="me-2" />
-                          Large (P500)
-                        </Button>
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Large <span style={{ fontWeight: 'bold' }}>25-40 KG</span></p>
+                          <p>Php 1,000</p>
+                        </div>
                       </Col>
-                      <Col xs={12} className="mb-2">
-                        <Button 
-                          className={`room-size-btn ${selectedService === 'daycare' && selectedSize === 'extra-large' ? 'selected' : ''}`}
-                          onClick={() => {
-                            setSelectedService('daycare');
-                            setSelectedSize('extra-large');
-                          }}
-                          style={{ 
-                            width: '100%', 
-                            padding: '15px',
-                            backgroundColor: '#FFF8E1',
-                            color: '#FF8C00',
-                            border: '1px solid #FFD180',
-                            borderRadius: '10px',
-                            fontSize: '1.1rem',
-                            fontWeight: 'bold',
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          {selectedService === 'daycare' && selectedSize === 'extra-large' && (
-                            <FontAwesomeIcon icon={faCheck} className="me-2" />
-                          )}
-                          <FontAwesomeIcon icon={faPaw} className="me-2" />
-                          Extra-Large (P600)
-                        </Button>
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Extra Large <span style={{ fontWeight: 'bold' }}>40+ KG</span></p>
+                          <p>Php 1,500</p>
+                        </div>
                       </Col>
-                    </Row>
-                    <p className="mt-3 text-center">Additional P80 per hour exceeded</p>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-            
-            {/* Marsha's Tub Section */}
-            <Col md={6}>
-              <Card className="mb-4" style={{ backgroundColor: '#fff', borderRadius: '10px' }}>
-                <Card.Body>
-                  <h3 className="text-center mb-3">MARSHA'S TUB</h3>
-                  <div className="p-3">
-                    <h5 className="mb-3">Pet Bath and Dry Services</h5>
-                    <Row className="mt-4 text-center">
-                      <Col xs={12} className="mb-2">
-                        <Button 
-                          className={`room-size-btn ${selectedService === 'tub' && selectedSize === 'small' ? 'selected' : ''}`}
-                          onClick={() => {
-                            setSelectedService('tub');
-                            setSelectedSize('small');
-                          }}
-                          style={{ 
-                            width: '100%', 
-                            padding: '15px',
-                            backgroundColor: '#FFF8E1',
-                            color: '#FF8C00',
-                            border: '1px solid #FFD180',
-                            borderRadius: '10px',
-                            fontSize: '1.1rem',
-                            fontWeight: 'bold',
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          {selectedService === 'tub' && selectedSize === 'small' && (
-                            <FontAwesomeIcon icon={faCheck} className="me-2" />
-                          )}
-                          <FontAwesomeIcon icon={faPaw} className="me-2" />
-                          Small (Dog/Cat) P350
-                        </Button>
-                      </Col>
-                      <Col xs={12} className="mb-2">
-                        <Button 
-                          className={`room-size-btn ${selectedService === 'tub' && selectedSize === 'medium' ? 'selected' : ''}`}
-                          onClick={() => {
-                            setSelectedService('tub');
-                            setSelectedSize('medium');
-                          }}
-                          style={{ 
-                            width: '100%', 
-                            padding: '15px',
-                            backgroundColor: '#FFF8E1',
-                            color: '#FF8C00',
-                            border: '1px solid #FFD180',
-                            borderRadius: '10px',
-                            fontSize: '1.1rem',
-                            fontWeight: 'bold',
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          {selectedService === 'tub' && selectedSize === 'medium' && (
-                            <FontAwesomeIcon icon={faCheck} className="me-2" />
-                          )}
-                          <FontAwesomeIcon icon={faPaw} className="me-2" />
-                          Medium P450
-                        </Button>
-                      </Col>
-                      <Col xs={12} className="mb-2">
-                        <Button 
-                          className={`room-size-btn ${selectedService === 'tub' && selectedSize === 'large' ? 'selected' : ''}`}
-                          onClick={() => {
-                            setSelectedService('tub');
-                            setSelectedSize('large');
-                          }}
-                          style={{ 
-                            width: '100%', 
-                            padding: '15px',
-                            backgroundColor: '#FFF8E1',
-                            color: '#FF8C00',
-                            border: '1px solid #FFD180',
-                            borderRadius: '10px',
-                            fontSize: '1.1rem',
-                            fontWeight: 'bold',
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          {selectedService === 'tub' && selectedSize === 'large' && (
-                            <FontAwesomeIcon icon={faCheck} className="me-2" />
-                          )}
-                          <FontAwesomeIcon icon={faPaw} className="me-2" />
-                          Large P550
-                        </Button>
-                      </Col>
-                      <Col xs={12} className="mb-2">
-                        <Button 
-                          className={`room-size-btn ${selectedService === 'tub' && selectedSize === 'extra-large' ? 'selected' : ''}`}
-                          onClick={() => {
-                            setSelectedService('tub');
-                            setSelectedSize('extra-large');
-                          }}
-                          style={{ 
-                            width: '100%', 
-                            padding: '15px',
-                            backgroundColor: '#FFF8E1',
-                            color: '#FF8C00',
-                            border: '1px solid #FFD180',
-                            borderRadius: '10px',
-                            fontSize: '1.1rem',
-                            fontWeight: 'bold',
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          {selectedService === 'tub' && selectedSize === 'extra-large' && (
-                            <FontAwesomeIcon icon={faCheck} className="me-2" />
-                          )}
-                          <FontAwesomeIcon icon={faPaw} className="me-2" />
-                          Extra-Large P650
-                        </Button>
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Cat</p>
+                          <p>Php 950</p>
+                        </div>
                       </Col>
                     </Row>
                   </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+          
+          {/* Basic Bath & Dry */}
+          <Card 
+            className="mb-4" 
+            style={{ 
+              backgroundColor: selectedService === 'basic' ? '#e8f5e9' : '#fff', 
+              borderRadius: '10px',
+              cursor: 'pointer',
+              border: selectedService === 'basic' ? '2px solid #28a745' : '1px solid rgba(0,0,0,.125)',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => {
+              setSelectedService(selectedService === 'basic' ? null : 'basic');
+              setSelectedServiceType('Basic Bath & Dry');
+            }}
+          >
+            <Card.Body>
+              <h4 className="text-center mb-3">
+                {selectedService === 'basic' && (
+                  <FontAwesomeIcon icon={faCheck} className="me-2" style={{ color: '#28a745' }} />
+                )}
+                BASIC BATH & DRY
+              </h4>
+              <p className="text-center">Organic Shampoo and Conditioner, Sanitary, Perfume & Powder (optional)</p>
+              
+              <Row className="mt-4 text-center">
+                <Col md={12}>
+                  <div className="price-info-box" style={{ 
+                    backgroundColor: '#FFF8E1', 
+                    padding: '20px', 
+                    borderRadius: '10px',
+                    border: '1px solid #FFD180'
+                  }}>
+                    <Row className="justify-content-center">
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Toy/Small <span style={{ fontWeight: 'bold' }}>1-9 KG</span></p>
+                          <p>Php 350</p>
+                        </div>
+                      </Col>
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Medium <span style={{ fontWeight: 'bold' }}>9-25 KG</span></p>
+                          <p>Php 450</p>
+                        </div>
+                      </Col>
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Large <span style={{ fontWeight: 'bold' }}>25-40 KG</span></p>
+                          <p>Php 550</p>
+                        </div>
+                      </Col>
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Extra Large <span style={{ fontWeight: 'bold' }}>40+ KG</span></p>
+                          <p>Php 750</p>
+                        </div>
+                      </Col>
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Cat</p>
+                          <p>Php 500</p>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+          
+          {/* Special Grooming Package */}
+          <Card 
+            className="mb-4" 
+            style={{ 
+              backgroundColor: selectedService === 'special' ? '#e8f5e9' : '#fff', 
+              borderRadius: '10px',
+              cursor: 'pointer',
+              border: selectedService === 'special' ? '2px solid #28a745' : '1px solid rgba(0,0,0,.125)',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => {
+              setSelectedService(selectedService === 'special' ? null : 'special');
+              setSelectedServiceType('Special Grooming Package');
+            }}
+          >
+            <Card.Body>
+              <h4 className="text-center mb-3">
+                {selectedService === 'special' && (
+                  <FontAwesomeIcon icon={faCheck} className="me-2" style={{ color: '#28a745' }} />
+                )}
+                SPECIAL GROOMING PACKAGE
+              </h4>
+              <p className="text-center">Basic Bath and Dry, Nail Trim, Face Trim, Sanitary, Paw Pad Trim</p>
+              
+              <Row className="mt-4 text-center">
+                <Col md={12}>
+                  <div className="price-info-box" style={{ 
+                    backgroundColor: '#FFF8E1', 
+                    padding: '20px', 
+                    borderRadius: '10px',
+                    border: '1px solid #FFD180'
+                  }}>
+                    <Row className="justify-content-center">
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Toy/Small <span style={{ fontWeight: 'bold' }}>1-9 KG</span></p>
+                          <p>Php 550</p>
+                        </div>
+                      </Col>
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Medium <span style={{ fontWeight: 'bold' }}>9-25 KG</span></p>
+                          <p>Php 650</p>
+                        </div>
+                      </Col>
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Large <span style={{ fontWeight: 'bold' }}>25-40 KG</span></p>
+                          <p>Php 800</p>
+                        </div>
+                      </Col>
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Extra Large <span style={{ fontWeight: 'bold' }}>40+ KG</span></p>
+                          <p>Php 1000</p>
+                        </div>
+                      </Col>
+                      <Col md={2} className="text-center mb-3">
+                        <div style={{ 
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 140, 0, 0.1)', 
+                          borderRadius: '8px',
+                          height: '100%'
+                        }}>
+                          <FontAwesomeIcon icon={faPaw} className="mb-2" style={{ fontSize: '1.5rem', color: '#FF8C00' }} />
+                          <p style={{ fontWeight: 'bold', margin: '0' }}>Cat</p>
+                          <p>Php 700</p>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+          
+          <ImportantNoticeCard>
+            <strong>Important:</strong> Your pet's size will be measured at our facility to determine the appropriate service rate. This ensures your pet gets the right care for their comfort and safety.
+          </ImportantNoticeCard>
           
           <div className="text-center mt-4">
             <Button 
@@ -325,31 +397,42 @@ const GroomingServices = () => {
               className="rounded-pill"
               style={{ backgroundColor: '#FF4500', borderColor: '#FF4500', padding: '10px 30px' }}
               onClick={() => {
-                if (selectedService && selectedSize) {
+                if (selectedService) {
                   // Get date and time data from location state
                   const dateTimeData = location.state || {};
                   
-                  // Add selected service and size to the data
+                  // Add selected service to the data (size will be determined at facility)
                   const bookingData = {
                     ...dateTimeData,
                     selectedService: selectedService,
-                    selectedSize: selectedSize,
+                    selectedServiceType: selectedServiceType,
+                    // We're not setting selectedSize as it will be determined at the facility
                     serviceType: 'grooming'
                   };
                   
                   // Navigate to reservation page with the data
                   navigate('/grooming-reservation', { state: bookingData });
                 } else {
-                  alert('Please select a service and size before proceeding.');
+                  alert('Please select a service before proceeding.');
                 }
               }}
-              disabled={!selectedService || !selectedSize}
+              disabled={!selectedService}
             >
               Book now <FontAwesomeIcon icon={faCalendarAlt} className="ms-2" />
             </Button>
           </div>
         </Container>
+        <div className="text-center mt-5">
+            <img 
+              src={baguioLogo}  
+              alt="Cat" 
+              className="img-fluid" 
+              style={{ maxWidth: '200px' }}
+            />
       </div>
+      </div>
+      
+      
       
       {/* Help Button */}
       <div style={{ position: 'fixed', bottom: '20px', right: '20px' }}>

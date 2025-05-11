@@ -3,8 +3,11 @@ import { Container, Row, Col, Card, Button, Alert, Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faEdit, faQuestion, faCalendarAlt, faPaw, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate, useLocation } from 'react-router-dom';
-import './Booking.css';
+import { API_URL } from '../config';
+import './ReservationStyles.css';
+import './ReservationNew.css';
 import DatePickerModal from './DatePickerModal';
+import { useBookings } from '../context/BookingContext';
 
 const Confirmation = () => {
   const navigate = useNavigate();
@@ -73,98 +76,97 @@ const Confirmation = () => {
     }
   };
   
+  // Get booking context functions
+  const { addBooking } = useBookings();
+  
   const handleConfirm = async () => {
     setIsSubmitting(true);
     setSubmitError(null);
     
     try {
-      // Check if backend server is available first
-      let backendAvailable = false;
-      try {
-        const pingResponse = await fetch(`${API_URL}/`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+      // Prepare booking data for submission
+      const bookingPayload = {
+        petName: bookingData.petDetails.name,
+        petType: bookingData.petDetails.type,
+        petBreed: bookingData.petDetails.breed,
+        petAge: bookingData.petDetails.age,
+        ownerName: bookingData.ownerDetails.name,
+        ownerEmail: bookingData.ownerDetails.email,
+        ownerPhone: bookingData.ownerDetails.phone,
+        startDate: bookingData.scheduledDateTime.split(' | ')[0], // Extract date part
+        endDate: bookingData.scheduledDateTime.includes(' to ') ? 
+          bookingData.scheduledDateTime.split(' to ')[1].split(' | ')[0] : 
+          bookingData.scheduledDateTime.split(' | ')[0],
+        selectedRoom: bookingData.selectedRoom || 'standard',
+        timeSlot: bookingData.scheduledDateTime.split(' | ')[1] || '8:00 am', // Extract time part and provide default
+        additionalServices: [bookingData.services],
+        specialRequirements: bookingData.additionalInfo || '',
+        totalCost: bookingData.totalCost || calculateTotalCost(), // Calculate based on selected services
+        status: 'pending', // Default status for new bookings
+        serviceType: serviceType, // Add service type (grooming or overnight)
+        selectedServiceType: bookingData.selectedServiceType || null, // Add specific grooming service type if available
+        selectedSize: bookingData.selectedSize || null // Add pet size category if specified
+      };
+      
+      // Function to calculate total cost based on selected services
+      function calculateTotalCost() {
+        let baseCost = 50;
         
-        if (pingResponse.ok) {
-          backendAvailable = true;
+        // Adjust cost based on room type
+        if (bookingData.selectedRoom === 'deluxe') {
+          baseCost = 75;
+        } else if (bookingData.selectedRoom === 'luxury') {
+          baseCost = 100;
         }
-      } catch (pingError) {
-        console.warn('Backend server connection issue:', pingError);
-        // We'll handle this gracefully below
+        
+        // Adjust cost based on pet size if available
+        if (bookingData.selectedSize === 'medium') {
+          baseCost += 10;
+        } else if (bookingData.selectedSize === 'large') {
+          baseCost += 20;
+        } else if (bookingData.selectedSize === 'extra-large') {
+          baseCost += 30;
+        }
+        
+        return baseCost;
       }
       
-      if (backendAvailable) {
-        try {
-          // Send booking data to the backend API
-          const response = await fetch(`${API_URL}/api/bookings`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              petName: bookingData.petDetails.name,
-              petType: bookingData.petDetails.type,
-              petBreed: bookingData.petDetails.breed,
-              petAge: bookingData.petDetails.age,
-              ownerName: bookingData.ownerDetails.name,
-              ownerEmail: bookingData.ownerDetails.email,
-              ownerPhone: bookingData.ownerDetails.phone,
-              startDate: bookingData.scheduledDateTime.split(' | ')[0], // Extract date part
-              endDate: bookingData.scheduledDateTime.includes(' to ') ? 
-                bookingData.scheduledDateTime.split(' to ')[1].split(' | ')[0] : 
-                bookingData.scheduledDateTime.split(' | ')[0],
-              selectedRoom: 'standard',
-              timeSlot: bookingData.scheduledDateTime.split(' | ')[1] || '8:00 am', // Extract time part and provide default
-              additionalServices: [bookingData.services],
-              specialRequirements: bookingData.additionalInfo || '',
-              totalCost: 50.00 // This would be calculated based on selected services
-            }),
-          });
-          
-          if (!response.ok) {
-            throw new Error('Failed to create booking');
-          }
-          
-          // Send email notification
-          if (bookingData.ownerDetails.email) {
-            try {
-              const emailResponse = await fetch(`${API_URL}/api/send-email`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  to: bookingData.ownerDetails.email,
-                  subject: 'Baguio Pet Boarding - Booking Confirmation',
-                  text: `Dear ${bookingData.ownerDetails.name},\n\nThank you for booking with Baguio Pet Boarding!\n\nBooking Details:\nPet Name: ${bookingData.petDetails.name}\nScheduled Date/Time: ${bookingData.scheduledDateTime}\nService: ${bookingData.services}\n\nIf you have any questions, please contact us.\n\nBest regards,\nBaguio Pet Boarding Team`
-                }),
-              });
-              
-              if (!emailResponse.ok) {
-                console.warn('Email notification could not be sent, but booking was successful');
-              }
-            } catch (emailError) {
-              console.warn('Email notification error:', emailError);
-              // Don't fail the whole process if just the email fails
+      // Use the BookingContext to add the booking
+      // This will handle both API and localStorage storage
+      const result = await addBooking(bookingPayload);
+      
+      if (result.success) {
+        // Try to send email notification if we have an email
+        if (bookingData.ownerDetails.email) {
+          try {
+            const emailResponse = await fetch(`${API_URL}/api/send-email`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                to: bookingData.ownerDetails.email,
+                subject: 'Baguio Pet Boarding - Booking Confirmation',
+                text: `Dear ${bookingData.ownerDetails.name},\n\nThank you for booking with Baguio Pet Boarding!\n\nBooking Details:\nPet Name: ${bookingData.petDetails.name}\nScheduled Date/Time: ${bookingData.scheduledDateTime}\nService: ${bookingData.services}\n\nYour booking is currently pending approval. We will notify you once it's confirmed.\n\nIf you have any questions, please contact us.\n\nBest regards,\nBaguio Pet Boarding Team`
+              }),
+            });
+            
+            if (!emailResponse.ok) {
+              console.warn('Email notification could not be sent, but booking was successful');
             }
+          } catch (emailError) {
+            console.warn('Email notification error:', emailError);
+            // Don't fail the whole process if just the email fails
           }
-        } catch (apiError) {
-          console.error('API error:', apiError);
-          // If there's an API error but the server is available, we'll proceed with demo mode
-          console.log('Proceeding with demo mode due to API error');
         }
-      } else {
-        console.log('Backend server unavailable, proceeding with demo mode');
+        
         // Simulate a short delay to make it feel like processing is happening
         await new Promise(resolve => setTimeout(resolve, 1500));
+        // Set success state
+        setSubmitSuccess(true);
+      } else {
+        throw new Error(result.message || 'Failed to create booking');
       }
-      
-      // Always show success in this demo version
-      // In a production environment, you would only set this if the API call was successful
-      setSubmitSuccess(true);
     } catch (error) {
       console.error('Error submitting booking:', error);
       setSubmitError(error.message || 'There was an error processing your booking. Please try again.');
@@ -174,66 +176,45 @@ const Confirmation = () => {
   };
   
   return (
-    <div className="booking-page">
-      {/* Navigation Tabs */}
-      <div className="gradient-background">
-        <Container>
-          <Nav className="justify-content-between">
-            <Nav.Item>
-              <Button 
-                variant="link" 
-                className="nav-link" 
-                onClick={() => setShowDatePickerModal(true)}
-                style={{ color: '#000' }}
-              >
-                <FontAwesomeIcon icon={faCalendarAlt} className="me-2" />
-                Select Date
-              </Button>
-            </Nav.Item>
-            <Nav.Item>
-              <Button 
-                variant="link" 
-                className="nav-link" 
-                onClick={() => navigate(serviceType === 'overnight' ? '/services' : '/grooming-services')}
-                style={{ color: '#000' }}
-              >
-                <FontAwesomeIcon icon={faPaw} className="me-2" />
-                Select Services
-              </Button>
-            </Nav.Item>
-            <Nav.Item>
-              <Button 
-                variant="link" 
-                className="nav-link" 
-                onClick={() => navigate(serviceType === 'overnight' ? '/overnight-reservation' : '/grooming-reservation')}
-                style={{ color: '#000' }}
-              >
-                <FontAwesomeIcon icon={faInfoCircle} className="me-2" />
-                Reservation Details
-              </Button>
-            </Nav.Item>
-            <Nav.Item>
-              <Button 
-                variant="link" 
-                className="nav-link active" 
-                style={{ color: '#000', fontWeight: 'bold' }}
-              >
-                Confirmation
-              </Button>
-            </Nav.Item>
-          </Nav>
-        </Container>
+    <div className="reservation-page">
+      {/* Progress Steps */}
+      <div className="progress-steps">
+        <div className="step">
+          <div className="step-circle completed">
+            <FontAwesomeIcon icon={faCalendarAlt} />
+          </div>
+          <div className="step-text">Select Date</div>
+        </div>
+        <div className="step">
+          <div className="step-circle completed">
+            <FontAwesomeIcon icon={faPaw} />
+          </div>
+          <div className="step-text">Select Services</div>
+        </div>
+        <div className="step">
+          <div className="step-circle completed">
+            <FontAwesomeIcon icon={faInfoCircle} />
+          </div>
+          <div className="step-text">Reservation Details</div>
+        </div>
+        <div className="step">
+          <div className="step-circle active">
+            <FontAwesomeIcon icon={faCheck} />
+          </div>
+          <div className="step-text active">Confirmation</div>
+        </div>
       </div>
       
       {/* Header Section */}
-      <div className="gradient-background" style={{ padding: '20px 0', textAlign: 'center' }}>
+      <div style={{ backgroundColor: '#ff9800', padding: '20px 0', textAlign: 'center', color: 'white' }}>
         <Container>
-          <h2 style={{ color: '#fff' }}>Confirmation</h2>
+          <h2>Booking Confirmation</h2>
+          <p>Please review your booking details</p>
         </Container>
       </div>
 
       {/* Confirmation Content */}
-      <div className="gradient-background" style={{ padding: '20px 0 40px' }}>
+      <div style={{ padding: '20px 0 40px', backgroundColor: 'white' }}>
         <Container>
           {submitSuccess ? (
             <Card className="confirmation-card p-4 text-center">
@@ -264,130 +245,159 @@ const Confirmation = () => {
                 </Alert>
               )}
               
-              <Card className="booking-form-card p-4 mb-4">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h3 className="mb-0">Pet's Details</h3>
+              <Card className="mb-4" style={{ borderRadius: '8px', boxShadow: '0 2px 5px rgba(0,0,0,0.1)', border: 'none' }}>
+                <div style={{ backgroundColor: '#ff9800', padding: '10px 20px', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h5 className="mb-0" style={{ color: 'white' }}>Pet's Details</h5>
                   <Button 
-                    variant="outline-primary" 
+                    variant="outline-light" 
                     size="sm"
                     onClick={() => handleEdit('pet')}
                     className="edit-btn"
                   >
-                    <FontAwesomeIcon icon={faEdit} className="me-2" />
+                    <FontAwesomeIcon icon={faEdit} className="me-1" />
                     Edit
                   </Button>
                 </div>
                 
-                <Row>
-                  <Col md={6} className="mb-3">
-                    <p className="mb-1"><strong>Name:</strong></p>
-                    <p>{bookingData.petDetails.name}</p>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <p className="mb-1"><strong>Type:</strong></p>
-                    <p>{bookingData.petDetails.type}</p>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <p className="mb-1"><strong>Breed:</strong></p>
-                    <p>{bookingData.petDetails.breed}</p>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <p className="mb-1"><strong>Sex:</strong></p>
-                    <p>{bookingData.petDetails.sex}</p>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <p className="mb-1"><strong>Age:</strong></p>
-                    <p>{bookingData.petDetails.age}</p>
-                  </Col>
-
-                </Row>
+                <div className="p-4">
+                  <table style={{ width: '100%' }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ padding: '8px 0', width: '50%' }}>
+                          <strong>Name:</strong>
+                          <div>{bookingData.petDetails.name}</div>
+                        </td>
+                        <td style={{ padding: '8px 0', width: '50%' }}>
+                          <strong>Type:</strong>
+                          <div>{bookingData.petDetails.type}</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '8px 0' }}>
+                          <strong>Breed:</strong>
+                          <div>{bookingData.petDetails.breed}</div>
+                        </td>
+                        <td style={{ padding: '8px 0' }}>
+                          <strong>Sex:</strong>
+                          <div>{bookingData.petDetails.sex}</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '8px 0' }}>
+                          <strong>Age:</strong>
+                          <div>{bookingData.petDetails.age}</div>
+                        </td>
+                        <td></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </Card>
               
-              <Card className="booking-form-card p-4 mb-4">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h3 className="mb-0">Owner's Details</h3>
+              <Card className="mb-4" style={{ borderRadius: '8px', boxShadow: '0 2px 5px rgba(0,0,0,0.1)', border: 'none' }}>
+                <div style={{ backgroundColor: '#ff9800', padding: '10px 20px', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h5 className="mb-0" style={{ color: 'white' }}>Owner's Details</h5>
                   <Button 
-                    variant="outline-primary" 
+                    variant="outline-light" 
                     size="sm"
                     onClick={() => handleEdit('owner')}
                     className="edit-btn"
                   >
-                    <FontAwesomeIcon icon={faEdit} className="me-2" />
+                    <FontAwesomeIcon icon={faEdit} className="me-1" />
                     Edit
                   </Button>
                 </div>
                 
-                <Row>
-                  <Col md={6} className="mb-3">
-                    <p className="mb-1"><strong>Name:</strong></p>
-                    <p>{bookingData.ownerDetails.name}</p>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <p className="mb-1"><strong>Email Address:</strong></p>
-                    <p>{bookingData.ownerDetails.email}</p>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <p className="mb-1"><strong>Mobile Number:</strong></p>
-                    <p>{bookingData.ownerDetails.phone}</p>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <p className="mb-1"><strong>Complete Address:</strong></p>
-                    <p>{bookingData.ownerDetails.address}</p>
-                  </Col>
-                </Row>
+                <div className="p-4">
+                  <table style={{ width: '100%' }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ padding: '8px 0', width: '50%' }}>
+                          <strong>Name:</strong>
+                          <div>{bookingData.ownerDetails.name}</div>
+                        </td>
+                        <td style={{ padding: '8px 0', width: '50%' }}>
+                          <strong>Email Address:</strong>
+                          <div>{bookingData.ownerDetails.email}</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '8px 0' }}>
+                          <strong>Mobile Number:</strong>
+                          <div>{bookingData.ownerDetails.phone}</div>
+                        </td>
+                        <td style={{ padding: '8px 0' }}>
+                          <strong>Complete Address:</strong>
+                          <div>{bookingData.ownerDetails.address}</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </Card>
               
-              <Card className="booking-form-card p-4 mb-4">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h3 className="mb-0">Booking Details</h3>
+              <Card className="mb-4" style={{ borderRadius: '8px', boxShadow: '0 2px 5px rgba(0,0,0,0.1)', border: 'none' }}>
+                <div style={{ backgroundColor: '#ff9800', padding: '10px 20px', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h5 className="mb-0" style={{ color: 'white' }}>Booking Details</h5>
                   <Button 
-                    variant="outline-primary" 
+                    variant="outline-light" 
                     size="sm"
                     onClick={() => handleEdit('booking')}
                     className="edit-btn"
                   >
-                    <FontAwesomeIcon icon={faEdit} className="me-2" />
+                    <FontAwesomeIcon icon={faEdit} className="me-1" />
                     Edit
                   </Button>
                 </div>
-                <Row>
-                  <Col md={6} className="mb-3">
-                    <p className="mb-1"><strong>Scheduled Date and Time:</strong></p>
-                    <p>{bookingData.scheduledDateTime}</p>
-                  </Col>
-                  <Col md={6} className="mb-3">
-                    <p className="mb-1"><strong>Services:</strong></p>
-                    <p>{bookingData.services}</p>
-                  </Col>
-                  {bookingData.selectedRoom && (
-                    <Col md={6} className="mb-3">
-                      <p className="mb-1"><strong>Room Type:</strong></p>
-                      <p>{bookingData.selectedRoom}</p>
-                    </Col>
-                  )}
-                  {bookingData.selectedSize && (
-                    <Col md={6} className="mb-3">
-                      <p className="mb-1"><strong>Size Category:</strong></p>
-                      <p>{bookingData.selectedSize}</p>
-                    </Col>
-                  )}
-                  {bookingData.additionalInfo && (
-                    <Col md={12} className="mb-3">
-                      <p className="mb-1"><strong>Additional Information:</strong></p>
-                      <p>{bookingData.additionalInfo}</p>
-                    </Col>
-                  )}
-                </Row>
+                <div className="p-4">
+                  <table style={{ width: '100%' }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ padding: '8px 0', width: '50%' }}>
+                          <strong>Scheduled Date and Time:</strong>
+                          <div>{bookingData.scheduledDateTime}</div>
+                        </td>
+                        <td style={{ padding: '8px 0', width: '50%' }}>
+                          <strong>Services:</strong>
+                          <div>{bookingData.services}</div>
+                        </td>
+                      </tr>
+                      {bookingData.selectedRoom && (
+                        <tr>
+                          <td style={{ padding: '8px 0' }}>
+                            <strong>Room Type:</strong>
+                            <div>{bookingData.selectedRoom}</div>
+                          </td>
+                          {bookingData.selectedSize && (
+                            <td style={{ padding: '8px 0' }}>
+                              <strong>Size Category:</strong>
+                              <div>{bookingData.selectedSize}</div>
+                            </td>
+                          )}
+                        </tr>
+                      )}
+                      {bookingData.additionalInfo && (
+                        <tr>
+                          <td colSpan="2" style={{ padding: '8px 0' }}>
+                            <strong>Additional Information:</strong>
+                            <div>{bookingData.additionalInfo}</div>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </Card>
               
               <div className="text-center">
                 <Button 
                   variant="success" 
-                  className="rounded-pill px-5 py-2"
+                  className="px-5 py-2"
                   onClick={handleConfirm}
                   disabled={isSubmitting}
+                  style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50', borderRadius: '4px', fontWeight: 'normal', marginTop: '10px' }}
                 >
-                  {isSubmitting ? 'Processing...' : 'Confirm'}
+                  {isSubmitting ? 'Processing...' : 'Confirm Reservation'}
                 </Button>
               </div>
             </>

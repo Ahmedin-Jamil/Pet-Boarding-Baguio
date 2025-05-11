@@ -1,25 +1,84 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Row, Col } from 'react-bootstrap';
+import { Modal, Button, Row, Col, Alert } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faClock } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { useBookings } from '../context/BookingContext';
 
 const DatePickerModal = ({ show, onHide, serviceType, onDateSelect }) => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date(new Date().setDate(new Date().getDate() + 3)));
   const [selectedTime, setSelectedTime] = useState(null);
+  const [showUnavailableAlert, setShowUnavailableAlert] = useState(false);
   
-  // Reset dates when modal opens
+  // Get unavailable dates and functions from context
+  const { unavailableDates, isDateUnavailable, fetchUnavailableDates } = useBookings();
+  
+  // Reset dates when modal opens and fetch latest unavailable dates
   useEffect(() => {
     if (show) {
       setStartDate(new Date());
       setEndDate(new Date(new Date().setDate(new Date().getDate() + 3)));
       setSelectedTime(null);
+      setShowUnavailableAlert(false);
+      
+      // Fetch the latest unavailable dates when modal opens
+      fetchUnavailableDates();
     }
-  }, [show]);
+  }, [show, fetchUnavailableDates]);
+  
+  // Update endDate when startDate changes to ensure endDate is never before startDate
+  useEffect(() => {
+    if (startDate && endDate && startDate >= endDate) {
+      // Set the end date to be at least one day after the start date
+      const newEndDate = new Date(startDate);
+      newEndDate.setDate(newEndDate.getDate() + 1);
+      setEndDate(newEndDate);
+    }
+  }, [startDate, endDate]);
 
+  // Filter out unavailable dates
+  const filterUnavailableDates = (date) => {
+    // Check if the date is unavailable - return false to disable the date
+    return !isDateUnavailable(date);
+  };
+  
+  // Handle date change with unavailable date check
+  const handleStartDateChange = (date) => {
+    if (isDateUnavailable(date)) {
+      setShowUnavailableAlert(true);
+      return;
+    }
+    
+    setShowUnavailableAlert(false);
+    setStartDate(date);
+  };
+  
+  // Handle end date change with unavailable date check
+  const handleEndDateChange = (date) => {
+    if (isDateUnavailable(date)) {
+      setShowUnavailableAlert(true);
+      return;
+    }
+    
+    setShowUnavailableAlert(false);
+    setEndDate(date);
+  };
+  
   const handleConfirm = () => {
+    // Validate that checkout date is not before check-in date
+    if (serviceType === 'overnight' && endDate < startDate) {
+      // Don't proceed if dates are invalid
+      return;
+    }
+    
+    // Check if either date is unavailable
+    if (isDateUnavailable(startDate) || (serviceType === 'overnight' && isDateUnavailable(endDate))) {
+      setShowUnavailableAlert(true);
+      return;
+    }
+    
     // Pass date and time data back to parent component
     onDateSelect({
       startDate: startDate,
@@ -44,6 +103,11 @@ const DatePickerModal = ({ show, onHide, serviceType, onDateSelect }) => {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
+        {showUnavailableAlert && (
+          <Alert variant="danger" className="mb-3">
+            The selected date is not available for booking. Please choose another date.
+          </Alert>
+        )}
         <Row className="mt-4">
           {serviceType === 'overnight' ? (
             <>
@@ -52,11 +116,12 @@ const DatePickerModal = ({ show, onHide, serviceType, onDateSelect }) => {
                   <h5><FontAwesomeIcon icon={faCalendarAlt} className="me-2" />Check-in Date</h5>
                   <DatePicker
                     selected={startDate}
-                    onChange={date => setStartDate(date)}
+                    onChange={handleStartDateChange}
                     selectsStart
                     startDate={startDate}
                     endDate={endDate}
                     minDate={new Date()}
+                    filterDate={filterUnavailableDates}
                     className="form-control"
                     calendarClassName="calendar-start"
                   />
@@ -67,11 +132,12 @@ const DatePickerModal = ({ show, onHide, serviceType, onDateSelect }) => {
                   <h5><FontAwesomeIcon icon={faCalendarAlt} className="me-2" />Check-out Date</h5>
                   <DatePicker
                     selected={endDate}
-                    onChange={date => setEndDate(date)}
+                    onChange={handleEndDateChange}
                     selectsEnd
                     startDate={startDate}
                     endDate={endDate}
                     minDate={startDate}
+                    filterDate={filterUnavailableDates}
                     className="form-control"
                     calendarClassName="calendar-end"
                   />
@@ -84,8 +150,9 @@ const DatePickerModal = ({ show, onHide, serviceType, onDateSelect }) => {
                 <h5><FontAwesomeIcon icon={faCalendarAlt} className="me-2" />Schedule Date</h5>
                 <DatePicker
                   selected={startDate}
-                  onChange={date => setStartDate(date)}
+                  onChange={handleStartDateChange}
                   minDate={new Date()}
+                  filterDate={filterUnavailableDates}
                   className="form-control"
                   calendarClassName="calendar-start"
                 />
@@ -117,10 +184,19 @@ const DatePickerModal = ({ show, onHide, serviceType, onDateSelect }) => {
         </Row>
       </Modal.Body>
       <Modal.Footer>
+        {serviceType === 'overnight' && endDate < startDate && (
+          <div className="text-danger w-100 mb-2">
+            <small>Check-out date cannot be earlier than check-in date.</small>
+          </div>
+        )}
         <Button variant="secondary" onClick={onHide}>
           Cancel
         </Button>
-        <Button variant="primary" onClick={handleConfirm}>
+        <Button 
+          variant="primary" 
+          onClick={handleConfirm}
+          disabled={serviceType === 'overnight' && endDate < startDate}
+        >
           Confirm
         </Button>
       </Modal.Footer>

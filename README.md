@@ -22,11 +22,21 @@ A full-stack web application for a pet hotel that offers boarding and grooming s
 - MySQL database
 - Google Gemini AI integration
 
+## Repository Structure
+
+```
+/
+├── pet-hotel/         # Frontend React application
+└── backend/          # Backend Node.js application
+```
+
 ## Deployment
 
 This project is deployed using:
 - Frontend: GitHub Pages
 - Backend: Render.com
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
 ## Setup Instructions
 
@@ -43,7 +53,7 @@ This project is deployed using:
    cd backend
    npm install
    ```
-3. Configure environment variables in `.env`
+3. Configure environment variables in `.env` (see `.env.example` for required variables)
 4. Set up the frontend:
    ```
    cd pet-hotel
@@ -59,23 +69,8 @@ This project is deployed using:
    cd pet-hotel
    npm start
    ```
+7. Access the application at `http://localhost:3000`
 
-## Deployment Configuration
+## License
 
-### Frontend (GitHub Pages)
-
-The frontend is configured to be deployed on GitHub Pages. The production build connects to the deployed backend API.
-
-### Backend (Render.com)
-
-The backend is deployed on Render.com with the following environment variables:
-- PORT: Automatically assigned by Render
-- DB_HOST: MySQL database host
-- DB_USER: MySQL database user
-- DB_PASSWORD: MySQL database password
-- DB_NAME: MySQL database name
-- API_KEY: Google Gemini AI API key
-
-## Contact
-
-Developed by Jamil (jamil.al.amin1100@gmail.com)
+This project is licensed under the MIT License - see the LICENSE file for details.
